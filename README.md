@@ -22,7 +22,7 @@ Traditional intrusion detection relies on hand-written rules (signature-based de
 5. **Stratified train/test split** (80/20) — preserves class proportions given severe imbalance (BruteForce is only ~0.5% of data)
 6. **Train & compare** — Decision Tree and Random Forest classifiers
 7. **Evaluate** — per-class precision/recall/F1 and confusion matrix (not just accuracy, which is misleading on imbalanced data)
-8. **Dashboard** — Flask app serving predictions with confidence scores
+8. **Dashboard** — Flask app with two modes: (a) single-flow prediction, pulling a random row from the held-out test set and showing predicted class + confidence + ground truth, and (b) batch classification via CSV upload, returning predictions and a per-class breakdown for every row
 
 ## Results
 
@@ -47,3 +47,29 @@ Both models performed extremely well on the held-out test set:
 - **Model persistence:** joblib
 
 ## Project Structure
+
+\```
+NIDS-CICIDS2017/
+├── data/                    # raw + cleaned CSVs (excluded from git — see .gitignore)
+├── src/
+│   ├── 01_load_combine.py   # loads, cleans, and combines raw CSVs
+│   └── 02_train_model.py    # trains/evaluates Decision Tree & Random Forest, saves .pkl files
+├── app/
+│   ├── app.py                # Flask dashboard (single + batch prediction)
+│   └── templates/
+├── rf_model.pkl              # trained model (excluded from git — see below)
+├── scaler.pkl                # fitted StandardScaler (excluded from git)
+├── label_encoder.pkl         # fitted LabelEncoder (excluded from git)
+├── .gitignore
+└── README.md
+\```
+
+## Running the Dashboard
+
+\```bash
+pip install flask pandas numpy scikit-learn joblib
+python app/app.py
+\```
+Then open `http://127.0.0.1:5000` in a browser.
+
+**Note:** `rf_model.pkl`, `scaler.pkl`, and `label_encoder.pkl` are excluded from this repo via `.gitignore` (kept lightweight, standard practice for trained model binaries). To run the dashboard yourself, first run `src/01_load_combine.py` then `src/02_train_model.py` to regenerate these files locally.
